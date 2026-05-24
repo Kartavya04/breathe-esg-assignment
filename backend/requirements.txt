@@ -4,6 +4,7 @@ django-cors-headers>=4.3.0
 gunicorn==20.1.0
 dj-database-url==2.1.0
 setuptools
-packaging
 wheel
 sqlparse
+packaging
+pip
