@@ -11,9 +11,10 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-bibrlh)+1=4#w8dkqd$eg
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    'breathe-esg-assignment-18f7.onrender.com',
+    'breathe-esg-assignment-18i7.onrender.com', # Yahan 'i' hai, 'f' nahi
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    '*' # Filhal ke liye star rakho taaki issue isolate ho sake
 ]
 
 # Application definition
