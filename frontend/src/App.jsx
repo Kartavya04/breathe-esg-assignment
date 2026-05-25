@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from './config'; // 🌟 Importing Dynamic Base URL
 
 export default function App() {
   const [reviewQueue, setReviewQueue] = useState([]);
-  const [currentTab, setCurrentTab] = useState('pending'); // 🌟 'pending' or 'approved'
+  const [currentTab, setCurrentTab] = useState('pending'); 
   const [selectedSource, setSelectedSource] = useState('SAP');
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState('');
@@ -10,9 +11,10 @@ export default function App() {
   // 1. FETCH THE QUEUE BASED ON THE ACTIVE TAB
   const fetchReviewQueue = async (tab = currentTab) => {
     try {
+      // 🌟 Connected with live/local environment url automatically
       const endpoint = tab === 'pending' 
-        ? 'http://127.0.0.1:8000/api/review-queue/' 
-        : 'http://127.0.0.1:8000/api/approved-ledger/'; // 🌟 Dynamic route targeting
+        ? `${API_BASE_URL}/api/review-queue/` 
+        : `${API_BASE_URL}/api/approved-ledger/`; 
         
       const response = await fetch(endpoint);
       if (response.ok) {
@@ -24,7 +26,6 @@ export default function App() {
     }
   };
 
-  // Re-fetch whenever the user switches tabs
   useEffect(() => {
     fetchReviewQueue(currentTab);
   }, [currentTab]);
@@ -39,7 +40,8 @@ export default function App() {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/upload/', {
+      // Galti yahan ho sakti hai:
+        const response = await fetch(`${API_BASE_URL}/api/upload/`, {  // <-- Ensure karo end mein / hai!
         method: 'POST',
         body: formData,
       });
@@ -48,7 +50,7 @@ export default function App() {
       if (response.ok) {
         setUploadMessage(`Success: ${result.message}`);
         setSelectedFile(null);
-        setCurrentTab('pending'); // Force switch back to pending tab to see new rows
+        setCurrentTab('pending'); 
         await fetchReviewQueue('pending');
       } else {
         setUploadMessage(`Error: ${result.error}`);
@@ -61,7 +63,7 @@ export default function App() {
   // 3. EXECUTE DATA ROW AUDIT ACTION
   const executeRowAction = async (rowId, actionType) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/review-queue/${rowId}/action/`, {
+      const response = await fetch(`${API_BASE_URL}/api/review-queue/${rowId}/action/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: actionType }),
@@ -143,7 +145,7 @@ export default function App() {
         {/* DATA CONTAINER BLOCK: AUDIT TRACK STREAM */}
         <div className="lg:col-span-3 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md">
           
-          {/* 🌟 TAB TOGGLE SWITCH BANNER */}
+          {/* TAB TOGGLE SWITCH BANNER */}
           <div className="flex gap-4 mb-4 border-b border-slate-700/60 pb-3">
             <button
               onClick={() => setCurrentTab('pending')}
@@ -216,7 +218,6 @@ export default function App() {
                       </td>
                       <td className="py-3.5 px-4 text-slate-400 text-xs">{row.accounting_date}</td>
                       
-                      {/* Only render action button if we are looking at pending records */}
                       {currentTab === 'pending' && (
                         <td className="py-3.5 px-4 text-center">
                           <div className="flex items-center justify-center gap-2">
