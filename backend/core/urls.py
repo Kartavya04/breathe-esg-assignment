@@ -1,14 +1,15 @@
 from django.contrib import admin
-from django.urls import path, include
-from django.http import HttpResponse
+from django.urls import path
+from django.contrib.auth.models import User
+from django.http import HttpResponse  # <--- Ye line add karo!
 
-# Simple view to confirm the backend is alive
-def home_view(request):
-    return HttpResponse("<h1>Backend is live!</h1><p>Go to <a href='/admin/'>/admin/</a> to log in.</p>")
+def create_admin(request):
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@test.com', 'password123')
+        return HttpResponse("Admin created! Now go to /admin/")
+    return HttpResponse("Admin already exists!")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_view),  # Root URL '/' par ye view chalega
-    # Agar aapne koi API app banayi hai, toh uska include yahan add karein:
-    # path('api/', include('your_app_name.urls')), 
+    path('create-admin/', create_admin),
 ]
