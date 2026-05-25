@@ -1,13 +1,13 @@
-from django.contrib import admin
-from django.urls import path, include
-from django.http import HttpResponse
-
-# A simple view for the home page
-def home_view(request):
-    return HttpResponse("Backend is live and running!")
+# pipeline/urls.py
+from django.urls import path
+from . import views  # Yeh aapke pipeline app ke views.py ko connect karega
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', home_view),  # This handles the root URL '/'
-    # path('api/', include('your_app_name.urls')), # Uncomment your actual API routes
+    # 🌟 Frontend ke fetch requests ab inhi paths par aayenge:
+    path('review-queue/', views.review_queue_view if hasattr(views, 'review_queue_view') else views.ReviewQueueView.as_view(), name='review-queue'),
+    path('approved-ledger/', views.approved_ledger_view if hasattr(views, 'approved_ledger_view') else views.ApprovedLedgerView.as_view(), name='approved-ledger'),
+    path('upload/', views.upload_view if hasattr(views, 'upload_view') else views.UploadView.as_view(), name='upload'),
+    
+    # Approve button ke liye row action path
+    path('review-queue/<int:row_id>/action/', views.execute_action_view if hasattr(views, 'execute_action_view') else views.ExecuteActionView.as_view(), name='row-action'),
 ]
