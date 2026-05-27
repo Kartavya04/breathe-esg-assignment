@@ -1,35 +1,33 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from django.views.generic import TemplateView
 # Aapke classes ko direct import kar rahe hain yahan
 from pipeline.views import DataIngestionAPIView, AnalystReviewQueueView, ApprovedLedgerView, ProcessRowActionView
 
-def home_view(request):
+# Superuser auto-create logic humne yahan barkarar rakhi hai taaki password galat na bataye
+def create_admin_if_not_exists():
     if not User.objects.filter(username='admin').exists():
         User.objects.create_superuser('admin', 'admin@test.com', 'password123')
-    
-    html_content = """
-    <html>
-        <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 100px;">
-            <h1>Backend is Live & Running!</h1>
-            <br/>
-            <a href="/admin/" style="padding: 10px 20px; background-color: #417690; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                Go to Admin Panel
-            </a>
-        </body>
-    </html>
-    """
-    return HttpResponse(html_content)
+
+# Isko call kar dete hain taaki server start hote hi admin ready rahe
+try:
+    create_admin_if_not_exists()
+except Exception:
+    pass
 
 urlpatterns = [
-    # Main Admin & Home
+    # 1. Main Admin Panel
     path('admin/', admin.site.urls),
-    path('', home_view),
     
-    # 🌟 DIRECT MAPPING (No pipeline/urls.py required)
+    # 2. 🌟 DIRECT API MAPPING
     path('api/review-queue/', AnalystReviewQueueView.as_view(), name='review-queue'),
     path('api/approved-ledger/', ApprovedLedgerView.as_view(), name='approved-ledger'),
     path('api/upload/', DataIngestionAPIView.as_view(), name='upload'),
     path('api/review-queue/<int:pk>/action/', ProcessRowActionView.as_view(), name='row-action'),
+
+    # 3. 🎯 SINGLE LINK FRONTEND ROUTER
+    # Jab koi main domain ya koi aur page khole, toh seedha Frontend ka index.html render hoga
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='frontend'),
 ]
